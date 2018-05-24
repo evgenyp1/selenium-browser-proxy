@@ -56,31 +56,40 @@ public class AppTest
         /**
          * add custom header to request*
          **/
-        proxy.addHeader("User-Agent", "TEST_AGENT");
-        proxy.addHeader("Custom-header", "CUSTOM_HEADER");
+        //proxy.addHeader("User-Agent", "TEST_AGENT");
+        //proxy.addHeader("Custom-header", "CUSTOM_HEADER");
 
 
         /**
          * Enable a response filter, which will monitor all responses and do some actions
          */
+
         ResponseFilter filter = new ResponseFilter() {
             public void filterResponse(HttpResponse httpResponse, HttpMessageContents httpMessageContents, HttpMessageInfo httpMessageInfo) {
 
-                //Change http status to something other
-                HttpResponseStatus status = httpResponse.getStatus();
-                httpResponse.setStatus(status);
 
                 //Print all url's, so we can later use it to filter particular responses:
                 System.out.println("intercepting response for url :" + httpMessageInfo.getOriginalUrl());
 
+                //Change http status to another for some url
+                if (httpMessageInfo.getOriginalUrl().contains("homepage-hero-large.jpg")) {
+
+                    System.out.println("FOUND URL");
+                    HttpResponseStatus newStatus = new HttpResponseStatus(500,"ERROR");
+                    HttpResponse res = httpResponse;
+                    res.setStatus(newStatus);
+
+                }
+
                 //change all occurrences of the word Wix to SUCCESS
-                String messageContents = httpMessageContents.getTextContents();
-                String newContents = messageContents.replaceAll("Wix", "SUCCESS");
-                httpMessageContents.setTextContents(newContents);
+                //String messageContents = httpMessageContents.getTextContents();
+                //String newContents = messageContents.replaceAll("Wix", "SUCCESS");
+                //httpMessageContents.setTextContents(newContents);
             }
         };
 
         proxy.addResponseFilter(filter);
+
         // create a new HAR with the label "wix.com"
         proxy.newHar("wix.com");
 
